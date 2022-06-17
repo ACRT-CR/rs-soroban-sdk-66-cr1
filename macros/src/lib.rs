@@ -42,7 +42,11 @@ pub fn contractimpl(_metadata: TokenStream, input: TokenStream) -> TokenStream {
         .filter(|m| is_trait || matches!(m.vis, Visibility::Public(_)))
         .map(|m| {
             let ident = &m.sig.ident;
-            let call = quote! { <#ty>::#ident };
+            let call = if let Some((_, t, _)) = &imp.trait_ {
+                quote! { <#ty as #t>::#ident }
+            } else {
+                quote! { <#ty>::#ident }
+            };
             wrap_and_spec(&call, ident, &m.sig.inputs, &m.sig.output)
         });
     quote! {
